@@ -1,28 +1,50 @@
-# LOLd.js - Multimodal Lightweight Online Laughter Detection
+## LOLd.js - Multimodal Lightweight Online Laughter Detection
 
-```
-* * * * * * * * * * * * * * * * * * * * * * * * *
-* Final Year Project (2019/2020)                *
-* BSc(Eng) "Creative Computing"                 *
-* Queen Mary University of London               *
-*                                               *
-* @Authors Alberto Morabito                     *
-* * * * * * * * * * * * * * * * * * * * * * * * *
-```
+A JavaScript API for multimodal laughter recognition via audiovisual signals.
 
-JavaScript (TS) API for laughter recognition with audiovisual data, built using Tensorflow.js <br>
-
-The multimodal recognition uses two different models:
+It uses two different models:
 
 - For video data the model used is [face-api.js](https://github.com/justadudewhohacks/face-api.js/)
-- For audio data, a custom model has been built (using RNN with LSTMs)
+- For audio data the model used is a custom one. Link will be available soon.
 
-## Setup dev environment
+### Example usage
 
-1. we need to transpile the `.js` code to `.ts`: <br>
-   `tsc --watch` <br>
-   Using the watch flag so that the files are transpiled automatically upon change.
+Using a live webcam feed
 
-2. we need to serve the files: <br>
-   `npm start` <br>
-   This will have `webpack-dev-server` serve the files on `localhost:8080`
+```
+// "isOfflineVideoVersion" will predict from a video element
+// which loaded an offiline video as opposed to live webcam feed.
+
+// Live webcam feed
+let audioStream: MediaStream | null = null;
+
+// Access browser's audio & video
+navigator.mediaDevices
+  .getUserMedia({ video: {}, audio: {} })
+  .then((stream) => {
+    if (!isOfflineVideoVersion) {
+      videoEl.srcObject = stream;
+    }
+    audioStream = stream;
+    return new Promise((resolve) => (videoEl.onplay = resolve));
+  })
+  .then(async (_loadEvent) => {
+    // Create an instance of Lold.js!
+    const lold = new Lold(videoEl, audioStream!, {
+      predictionMode: "multimodal", // Can also access "audio" or "video" single modality
+      videoSourceType: isOfflineVideoVersion ? "video" : "webcam",
+    });
+
+    // Load all models and required (from face-api.js and lold.js audio model)
+    await lold.loadModels();
+
+    // Start predicting. Predictions run in the background and can be
+    // accessed with getters (e.g. getMultimodalPrediction)
+    lold.startMultimodalPrediction();
+
+    // Get the predictions
+    let [audioConfidence, videoConfidence] = lold.getMultimodalPrediction();
+    console.log(audioConfidence, videoConfidence);
+    // Output: 0.524245215, 0.852215253
+
+```
