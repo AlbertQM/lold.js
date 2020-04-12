@@ -13,7 +13,7 @@ Using a live webcam feed
 
 ```
 // "isOfflineVideoVersion" will predict from a video element
-// which loaded an offiline video as opposed to live webcam feed.
+// which loaded an offline video as opposed to live webcam feed.
 
 // Live webcam feed
 let audioStream: MediaStream | null = null;
